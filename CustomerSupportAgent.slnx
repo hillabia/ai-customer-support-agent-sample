@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/CustomerSupportAgent/CustomerSupportAgent.csproj" />
+  <Project Path="tests/CustomerSupportAgent.Tests/CustomerSupportAgent.Tests.csproj" />
+</Solution>
