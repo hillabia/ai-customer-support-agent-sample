@@ -1,5 +1,6 @@
 using CustomerSupportAgent.Agent;
 using CustomerSupportAgent.Services;
+using Xunit;
 
 namespace CustomerSupportAgent.Tests;
 
