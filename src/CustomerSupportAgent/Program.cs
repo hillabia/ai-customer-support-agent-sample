@@ -1,11 +1,13 @@
 using CustomerSupportAgent.Agent;
-using CustomerSupportAgent.Services;
+using CustomerSupportAgent.Classification;
+using CustomerSupportAgent.Knowledge;
+using CustomerSupportAgent.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IntentClassifier>();
-builder.Services.AddSingleton<KnowledgeService>();
-builder.Services.AddSingleton<SupportAgent>();
+builder.Services.AddSingleton<IIntentClassifier, RuleBasedIntentClassifier>();
+builder.Services.AddSingleton<IKnowledgeService, InMemoryKnowledgeService>();
+builder.Services.AddSingleton<ISupportAgent, SupportAgent>();
 
 var app = builder.Build();
 
@@ -15,14 +17,12 @@ app.MapGet("/", () => Results.Ok(new
     endpoint = "POST /support"
 }));
 
-app.MapPost("/support", (SupportRequest request, SupportAgent agent) =>
+app.MapPost("/support", (SupportRequest request, ISupportAgent agent) =>
 {
     var response = agent.Handle(request.Message ?? string.Empty);
     return Results.Ok(response);
 });
 
 app.Run();
-
-public sealed record SupportRequest(string? Message);
 
 public partial class Program;
