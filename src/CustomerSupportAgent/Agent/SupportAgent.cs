@@ -1,37 +1,32 @@
+using CustomerSupportAgent.Classification;
+using CustomerSupportAgent.Constants;
+using CustomerSupportAgent.Knowledge;
 using CustomerSupportAgent.Models;
-using CustomerSupportAgent.Services;
 
 namespace CustomerSupportAgent.Agent;
 
 public sealed class SupportAgent(
-    IntentClassifier classifier,
-    KnowledgeService knowledge)
+    IIntentClassifier classifier,
+    IKnowledgeService knowledge) : ISupportAgent
 {
     public AgentResponse Handle(string message)
     {
         if (string.IsNullOrWhiteSpace(message))
-        {
-            return Escalate(
-                SupportIntent.Unknown,
-                "I need a message before I can help.");
-        }
+            return Escalate(SupportIntent.Unknown, AgentMessages.EmptyMessage);
 
         var intent = classifier.Classify(message);
 
-        if (intent is SupportIntent.BillingIssue or SupportIntent.HumanRequest)
-        {
-            return Escalate(
-                intent,
-                "This request should be handled by a team member. I'll pass it along with the context you provided.");
-        }
+        if (RequiresHuman(intent))
+            return Escalate(intent, AgentMessages.HumanHandoff);
 
         if (knowledge.TryGetAnswer(intent, out var answer))
             return new AgentResponse(intent.ToString(), answer, false);
 
-        return Escalate(
-            intent,
-            "I don't have enough approved information to answer that reliably, so I'll send it to a team member.");
+        return Escalate(intent, AgentMessages.UnsupportedRequest);
     }
+
+    private static bool RequiresHuman(SupportIntent intent) =>
+        intent is SupportIntent.BillingIssue or SupportIntent.HumanRequest;
 
     private static AgentResponse Escalate(SupportIntent intent, string message) =>
         new(intent.ToString(), message, true);
