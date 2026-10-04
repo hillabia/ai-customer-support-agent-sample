@@ -1,5 +1,6 @@
 using CustomerSupportAgent.Agent;
-using CustomerSupportAgent.Services;
+using CustomerSupportAgent.Classification;
+using CustomerSupportAgent.Knowledge;
 using Xunit;
 
 namespace CustomerSupportAgent.Tests;
@@ -7,7 +8,7 @@ namespace CustomerSupportAgent.Tests;
 public sealed class SupportAgentTests
 {
     private readonly SupportAgent _agent =
-        new(new IntentClassifier(), new KnowledgeService());
+        new(new RuleBasedIntentClassifier(), new InMemoryKnowledgeService());
 
     [Fact]
     public void KnownBusinessQuestion_IsAnsweredWithoutEscalation()
